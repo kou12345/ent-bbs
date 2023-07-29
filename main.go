@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/kou12345/ent-bbs/ent"
 	"github.com/kou12345/ent-bbs/ent/entry"
@@ -35,6 +36,19 @@ func main() {
 		e := client.Entry.Create()
 		e.SetContent(c.FormValue("content"))
 		if _, err := e.Save(context.Background()); err != nil {
+			log.Println(err.Error())
+			return c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		}
+		return c.Redirect(http.StatusFound, "/")
+	})
+	e.DELETE("/:id", func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			log.Println(err.Error())
+			return c.String(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		}
+		err = client.Entry.DeleteOneID(id).Exec(context.Background())
+		if err != nil {
 			log.Println(err.Error())
 			return c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		}
