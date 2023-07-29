@@ -54,5 +54,19 @@ func main() {
 		}
 		return c.Redirect(http.StatusFound, "/")
 	})
+	e.PUT("/:id", func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			log.Println(err.Error())
+			return c.String(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		}
+		content := c.FormValue("content")
+		_, err = client.Entry.UpdateOneID(id).SetContent(content).Save(context.Background())
+		if err != nil {
+			log.Println(err.Error())
+			return c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		}
+		return c.Redirect(http.StatusFound, "/")
+	})
 	e.Logger.Fatal(e.Start(":8989"))
 }
